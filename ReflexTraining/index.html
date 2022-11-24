@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+<title>Page Title</title>
+</head>
+<body>
+
+    <div id="WelcomePage">
+        <h1>Welcome to Reflex Training! The goal of this game is to hit all targets without missing any! be careful, your only allowed to miss 3 targets, then its game over! try and get the highest score possible!</h1>
+        <button id="ReflexTraining" onclick="ReflexTraining()">Start Reflex Training</button>
+    </div>
+
+    <canvas style="border-style: double;" id="canvas"></canvas>
+    
+    <div id="ReflexTrainingInformation">
+        <p id="score">Score : 0</p>
+        <p id="timer">Timer</p>
+        <p id="lives">Lives</p>
+    </div>
+
+    <script>
+        const welcomePage = document.getElementById('WelcomePage')
+        const reflexTrainingInformation = document.getElementById('ReflexTrainingInformation')
+        const lives = document.getElementById('lives');
+
+
+        const canvas = document.getElementsByTagName('canvas')[0];
+        const context = canvas.getContext('2d');
+        const playerScore = document.getElementById('score');
+        const playerTimer = document.getElementById('timer');
+        canvas.width  = window.innerWidth - 30;
+        canvas.height = window.innerHeight - 100;
+
+
+        function ReflexTraining(){
+            canvas.style.display = "block";
+            welcomePage.style.display = "none";
+            reflexTrainingInformation.style.display = "flex";
+            let time = 1;
+            let timeInterval = 11;
+            let numLives = 3;
+            let score = 0;
+            let radius = 20;
+            let circleX = 500;
+            let circleY = 500;
+            let numCircles = 1;
+            let totalNumCircles = 20
+            var doAnim = true;
+            setInterval(function(){playerTimer.innerHTML = "Time : " +  time++ + " Seconds" }, 1000)
+            lives.innerHTML = "Lives : " + numLives;
+            
+            class Circle {
+                constructor (x, y, _radius){
+                    this.x = x;
+                    this.y = y;
+                    this.radius = _radius
+                }
+                draw(){
+                    context.beginPath();
+                    context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                    context.fillStyle = 'yellow'
+                    context.fill();
+                    if(radius == 50){
+                        context.fillStyle = 'green';
+                        context.fill();
+                    }
+                    this.radius += 0.05;
+                    context.closePath();
+                    context.stroke();
+                }
+                update(){
+                    this.draw();
+                    if (time == timeInterval){
+                        timeInterval += 10;
+                        numCircles++;
+                    }
+                    for (var i = 0; i < numCircles; i++){
+                        if(myCircle[i].radius >= 80){
+                            numLives--;
+                            CircleClick(i);
+                            lives.innerHTML = "Lives : " + numLives;
+                        }
+                    }
+
+                    if(numLives == 0){
+                        playerScore.innerHTML = "Score : " + score;
+                        lives.innerHTML = "Lives : " + numLives;
+                        EndScreen(score, time);
+                        numLives = -1;
+                        time = 0;
+                        score = 0;
+                        playerScore.innerHTML = "Score : " + score;
+
+                        doAnim = false;
+
+                    }
+                }
+            }
+            
+            canvas.addEventListener("click", function (e){
+            var rect = canvas.getBoundingClientRect();
+            var mouseX = (e.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+            var mouseY = (e.clientY - rect.left) / (rect.right - rect.left) * canvas.width;
+            for (var i = 0; i < numCircles; i++){
+                    if (Math.sqrt((mouseX-myCircle[i].x)*(mouseX-myCircle[i].x) + (mouseY-myCircle[i].y)*(mouseY-myCircle[i].y)) < myCircle[i].radius){
+                    CircleClick(i);
+                    }
+                }
+            })
+
+
+            let myCircle = new Array(totalNumCircles);
+            for (let i = 0; i < totalNumCircles; i++){
+                myCircle[i] = new Circle(Math.floor((Math.random() * canvas.width) + 1), Math.floor((Math.random() * canvas.height) + 1), radius);
+
+            }
+
+            animate();
+            function animate() {
+                if(!doAnim){
+                    context = null;
+                    return;
+                }
+                if(numLives != 0){
+                    requestAnimationFrame(animate);
+                }
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                for (var i = 0; i < numCircles; i++){
+                    myCircle[i].update()
+                }
+            }
+
+
+            
+            function CircleClick(i){
+                score += 100;
+                playerScore.innerHTML = "Score : " + score;
+                myCircle[i].x = Math.floor((Math.random() * canvas.width) + 1);
+                myCircle[i].y = Math.floor((Math.random() * canvas.height) + 1);
+                myCircle[i].radius = radius;
+            }
+        }
+        function EndScreen(score, time){
+            alert("Game over!!! your total score was " + score + " and your total time was " + time + " Seconds! Press ok to restart!");
+            ReflexTraining();
+        }
+
+    </script>
+</body>
+</html>
+</html>
